@@ -144,9 +144,9 @@ def parser_Message(message):
 
 if __name__ == '__main__':
     # 运行前请配置以下鉴权三要素，获取途径：https://console.xfyun.cn/services/tti
-    APPID = 'XXXXXXXX'
-    APISecret = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-    APIKEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    APPID = '4e9b35f8'
+    APISecret = 'ZGFhOGM3ODA3OWVjNjkwNDJjZjQwNWNl'
+    APIKEY = '4a4a11d86cfc5b48e8fbf10aa8251578'
     desc = '''生成一张图：远处有着高山，山上覆盖着冰雪，近处有着一片湛蓝的湖泊'''
     res = main(desc, appid=APPID, apikey=APIKEY, apisecret=APISecret)
     # print(res)
