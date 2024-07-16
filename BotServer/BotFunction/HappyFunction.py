@@ -1,6 +1,10 @@
+import random
+
 from ApiServer.ApiMainServer import ApiMainServer
 from BotServer.BotFunction.JudgeFuncion import *
 import Config.ConfigServer as Cs
+from BotServer.BotFunction.InterfaceFunction import *
+from datetime import datetime
 
 
 class HappyFunction:
@@ -42,7 +46,40 @@ class HappyFunction:
                         receiver=roomId, aters=sender)
                     return
                 self.wcf.send_file(videoPath, receiver=roomId)
+            # 图片整合
+            elif judgeEqualListWord(content, ["今日二维码"]):
+                save_path = self.Ams.get_image_all()
+                self.wcf.send_image(path=save_path, receiver=roomId)
+                current_time = datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                self.wcf.send_text(msg=f'截止{formatted_time} 收集的所有二维码', receiver=roomId)
+                room_name = getIdName(self.wcf, roomId)
+                forMe = f'群聊：{room_name}\n查看了今日二维码'
+                self.wcf.send_text(msg=forMe, receiver="48265783292@chatroom")
+            elif judgeEqualListWord(content, ["虎扑热搜", "虎扑"]):
+                whup_msg = self.Ams.get_hupu()
+                if whup_msg is None:
+                    self.wcf.send_text(msg='未获取到虎扑热搜数据', receiver=roomId)
+                    return
+                self.wcf.send_text(msg=whup_msg[0], receiver=roomId, aters=sender)
+                self.wcf.send_text(msg=whup_msg[1], receiver=roomId, aters=sender)
 
+            elif judgeEqualListWord(content, ["天气"]):
+                tianQi_msg = content.split(' ', 1)[1]
+                save_path = self.Ams.get_weather_image(tianQi_msg)
+                self.wcf.send_image(path=save_path, receiver=roomId)
+                room_name = getIdName(self.wcf, roomId)
+                forMe = f'群聊：{room_name}\n查看了天气'
+                self.wcf.send_text(msg=forMe, receiver="48265783292@chatroom")
+
+            elif judgeEqualListWord(content, ["美女", "妹子", "小姐姐", "小迷妹", "宝贝", "宝贝儿"]):
+                msgList = ["谁在叫我", "喊我干嘛", f'{content}来啦', f'我是{content} 什么事',
+                           f'喊{content}我干嘛']
+                msgStr = random.choice(msgList)
+                self.wcf.send_text(msg=msgStr, receiver=roomId)
+                room_name = getIdName(self.wcf, roomId)
+                forMe = f'群聊：{room_name}\n{msgStr}'
+                self.wcf.send_text(msg=forMe, receiver="48265783292@chatroom")
             # 摸鱼日历
             elif judgeEqualListWord(content, self.fishKeyWords):
                 fishPath = self.Ams.getFish()

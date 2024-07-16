@@ -56,6 +56,27 @@ class ApiMainServer:
         """
         return Ps.Ha.getPic()
 
+    def get_hupu(self, ):
+        """
+        虎扑
+        :return:
+        """
+        return Ps.Ha.getHuPu()
+
+    def get_image_all(self, ):
+        """
+        图片整合
+        :return:
+        """
+        return Ps.Ha.getImageAll()
+
+    def get_weather_image(self, content):
+        """
+        天气
+        :return:
+        """
+        return Ps.Ha.getWeatherImage(content)
+
     def getGirlVideo(self, ):
         """
         美女视频调用接口

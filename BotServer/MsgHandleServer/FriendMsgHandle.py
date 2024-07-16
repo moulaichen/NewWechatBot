@@ -1,3 +1,5 @@
+import re
+
 from BotServer.BotFunction.InterfaceFunction import *
 from ApiServer.AiServer.AiDialogue import AiDialogue
 from BotServer.BotFunction.JudgeFuncion import *
@@ -6,6 +8,11 @@ import xml.etree.ElementTree as ET
 import Config.ConfigServer as Cs
 from OutPut.outPut import op
 from threading import Thread
+
+
+def check_img_tag(text):
+    pattern = re.compile(r'<img.*?>', re.DOTALL)
+    return bool(pattern.search(text))
 
 
 class FriendMsgHandle:

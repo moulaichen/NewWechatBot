@@ -45,6 +45,30 @@ def returnGaoDeCacheFolder():
     return returnCachePath() + '/gaodeCacheFolder'
 
 
+def returnWeatherCacheFolder():
+    """
+    返回天气缓存文件夹
+    :return:
+    """
+    return returnCachePath() + '/weatherCacheFolder'
+
+
+def returnAllImageCacheFolder():
+    """
+    返回天气缓存文件夹
+    :return:
+    """
+    return returnCachePath() + '/allImageCacheFolder'
+
+
+def returnAllImageQunCacheFolder():
+    """
+    返回天气缓存文件夹
+    :return:
+    """
+    return returnCachePath() + '/allImageQunCacheFolder'
+
+
 def returnAiPicFolder():
     """
     返回Ai生成图像缓存文件夹
@@ -65,6 +89,10 @@ def clearCacheFolder():
         file_lists += [returnFishCacheFolder() + '/' + file for file in os.listdir(returnFishCacheFolder())]
         file_lists += [returnGaoDeCacheFolder() + '/' + file for file in os.listdir(returnGaoDeCacheFolder())]
         file_lists += [returnAiPicFolder() + '/' + file for file in os.listdir(returnAiPicFolder())]
+        file_lists += [returnWeatherCacheFolder() + '/' + file for file in os.listdir(returnWeatherCacheFolder())]
+        file_lists += [returnAllImageCacheFolder() + '/' + file for file in os.listdir(returnAllImageCacheFolder())]
+        file_lists += [returnAllImageQunCacheFolder() + '/' + file for file in
+                       os.listdir(returnAllImageQunCacheFolder())]
         for rm_file in file_lists:
             os.remove(rm_file)
         return True
@@ -86,6 +114,12 @@ def initCacheFolder():
         os.mkdir(returnFishCacheFolder())
     if not os.path.exists(returnGaoDeCacheFolder()):
         os.mkdir(returnGaoDeCacheFolder())
+    if not os.path.exists(returnWeatherCacheFolder()):
+        os.mkdir(returnWeatherCacheFolder())
+    if not os.path.exists(returnAllImageCacheFolder()):
+        os.mkdir(returnAllImageCacheFolder())
+    if not os.path.exists(returnAllImageQunCacheFolder()):
+        os.mkdir(returnAllImageQunCacheFolder())
     if not os.path.exists(returnAiPicFolder()):
         os.mkdir(returnAiPicFolder())
         op(f'[+]: 初始化缓存文件夹成功!!!')
