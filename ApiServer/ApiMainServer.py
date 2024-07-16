@@ -111,7 +111,7 @@ class ApiMainServer:
         :param content:
         :return:
         """
-        return self.Ad.getAi(content)
+        return self.Ad.getNewAi(content)
 
     def getAiPic(self, content):
         """

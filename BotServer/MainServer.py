@@ -1,3 +1,5 @@
+import os
+
 from BotServer.MsgHandleServer.FriendMsgHandle import FriendMsgHandle
 from BotServer.MsgHandleServer.RoomMsgHandle import RoomMsgHandle
 from PushServer.PushMainServer import PushMainServer
@@ -8,17 +10,20 @@ from OutPut.outPut import op
 from cprint import cprint
 from queue import Empty
 from wcferry import Wcf
+import Config.ConfigServer as Cs
 
 
 class MainServer:
     def __init__(self):
         self.wcf = Wcf()
         self.Dis = DbInitServer()
+        configData = Cs.returnConfigData()
         # 开启全局接收
         self.wcf.enable_receiving_msg()
         self.Rmh = RoomMsgHandle(self.wcf)
         self.Fmh = FriendMsgHandle(self.wcf)
         self.Pms = PushMainServer(self.wcf)
+        self.save_image_qun = configData['save_image_qun']
         # 初始化服务以及配置
         Thread(target=self.initConfig, name='初始化服务以及配置').start()
 
@@ -45,9 +50,9 @@ class MainServer:
         while self.wcf.is_receiving_msg():
             try:
                 msg = self.wcf.get_msg()
-                # 调试专用
-                op(f'[*]: 接收到消息: {msg}')
-                # op(f'[*]: 接收到消息\n[*]: 群聊ID: {msg.roomid}\n[*]: 发送人ID: {msg.sender}\n[*]: 发送内容: {msg.content}\n--------------------')
+                if (msg.roomid == "" and msg.type == 3) or msg.type == 1 or msg.roomid in self.save_image_qun:
+                    # 调试专用
+                    op(f" 接收到消息: {msg}")
                 # 群聊消息处理
                 if '@chatroom' in msg.roomid:
                     Thread(target=self.Rmh.mainHandle, args=(msg,)).start()

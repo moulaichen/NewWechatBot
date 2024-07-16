@@ -55,7 +55,7 @@ def returnWeatherCacheFolder():
 
 def returnAllImageCacheFolder():
     """
-    返回天气缓存文件夹
+    图片整合
     :return:
     """
     return returnCachePath() + '/allImageCacheFolder'
@@ -63,7 +63,7 @@ def returnAllImageCacheFolder():
 
 def returnAllImageQunCacheFolder():
     """
-    返回天气缓存文件夹
+    收集的二维码
     :return:
     """
     return returnCachePath() + '/allImageQunCacheFolder'

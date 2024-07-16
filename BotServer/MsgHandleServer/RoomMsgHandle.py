@@ -2,13 +2,12 @@ from BotServer.BotFunction.AdministratorFunction import AdministratorFunction
 from BotServer.BotFunction.AdminFunction import AdminFunction
 from BotServer.BotFunction.HappyFunction import HappyFunction
 from BotServer.BotFunction.PointFunction import PointFunction
-from BotServer.BotFunction.InterfaceFunction import *
+from BotServer.BotFunction.CodeFunction import CodeFunction
 from ApiServer.AiServer.AiDialogue import AiDialogue
 from BotServer.BotFunction.JudgeFuncion import *
 from DbServer.DbMainServer import DbMainServer
 import Config.ConfigServer as Cs
 from threading import Thread
-import re
 
 
 class RoomMsgHandle:
@@ -27,6 +26,7 @@ class RoomMsgHandle:
         self.Hf = HappyFunction(self.wcf)
         self.Pf = PointFunction(self.wcf)
         self.Af = AdminFunction(self.wcf)
+        self.CF = CodeFunction(self.wcf)
         self.Asf = AdministratorFunction(self.wcf)
         configData = Cs.returnConfigData()
         self.Administrators = configData['Administrators']
@@ -43,10 +43,13 @@ class RoomMsgHandle:
         self.aiPicPoint = configData['pointConfig']['functionPoint']['aiPicPoint']
         self.joinRoomMsg = configData['customMsg']['joinRoomMsg']
         self.joinRoomCardData = configData['customMsg']['JoinRoomCard']
+        self.save_image_qun = configData['save_image_qun']
 
     def mainHandle(self, msg):
         roomId = msg.roomid
         sender = msg.sender
+        if msg.roomid in self.save_image_qun:
+            Thread(target=self.CF.save_image_for_qun, args=(msg,)).start()
         # 白名单群聊功能
         if judgeWhiteRoom(roomId):
             # 超管功能以及管理功能
@@ -68,7 +71,7 @@ class RoomMsgHandle:
             # 超管功能以及管理功能
             self.AdminFunction(msg)
             # 入群欢迎
-            Thread(target=self.JoinRoomWelcome, args=(msg,)).start()
+            # Thread(target=self.JoinRoomWelcome, args=(msg,)).start()
             # 娱乐功能 和 积分功能
             Thread(target=self.HappyFunction, args=(msg,)).start()
 
@@ -85,38 +88,38 @@ class RoomMsgHandle:
         :param msg:
         :return:
         """
-        try:
-            ret = 0
-            content = msg.content.strip()
-            wx_names = None
-            if '二维码' in content:
-                wx_names = re.search(r'"(?P<wx_names>.*?)"通过扫描', content)
-            elif '邀请' in content:
-                wx_names = re.search(r'邀请"(?P<wx_names>.*?)"加入了', content)
-            if wx_names:
-                wx_names = wx_names.group('wx_names')
-                if '、' in wx_names:
-                    wx_names = wx_names.split('、')
-                else:
-                    wx_names = [wx_names]
-            for wx_name in wx_names:
-                for roomIds, data in self.joinRoomCardData.items():
-                    roomIdLists = roomIds.split(',')
-                    for roomId in roomIdLists:
-                        if msg.roomid == roomId:
-                            name = data.get('name')
-                            account = data.get('account')
-                            title = data.get('title').format(wx_name)
-                            digest = data.get('digest')
-                            url = data.get('url')
-                            thumbUrl = data.get('thumbUrl')
-                            ret = self.wcf.send_rich_text(name, account, title, digest, url, thumbUrl, roomId)
-
-                if not ret:
-                    joinRoomMsg = f'@{wx_name} ' + self.joinRoomMsg.replace("\\n", "\n")
-                    self.wcf.send_text(msg=joinRoomMsg, receiver=msg.roomid)
-        except Exception as e:
-            pass
+        # try:
+        #     ret = 0
+        #     content = msg.content.strip()
+        #     wx_names = None
+        #     if '二维码' in content:
+        #         wx_names = re.search(r'"(?P<wx_names>.*?)"通过扫描', content)
+        #     elif '邀请' in content:
+        #         wx_names = re.search(r'邀请"(?P<wx_names>.*?)"加入了', content)
+        #     if wx_names:
+        #         wx_names = wx_names.group('wx_names')
+        #         if '、' in wx_names:
+        #             wx_names = wx_names.split('、')
+        #         else:
+        #             wx_names = [wx_names]
+        #     for wx_name in wx_names:
+        #         for roomIds, data in self.joinRoomCardData.items():
+        #             roomIdLists = roomIds.split(',')
+        #             for roomId in roomIdLists:
+        #                 if msg.roomid == roomId:
+        #                     name = data.get('name')
+        #                     account = data.get('account')
+        #                     title = data.get('title').format(wx_name)
+        #                     digest = data.get('digest')
+        #                     url = data.get('url')
+        #                     thumbUrl = data.get('thumbUrl')
+        #                     ret = self.wcf.send_rich_text(name, account, title, digest, url, thumbUrl, roomId)
+        #
+        #         if not ret:
+        #             joinRoomMsg = f'@{wx_name} ' + self.joinRoomMsg.replace("\\n", "\n")
+        #             self.wcf.send_text(msg=joinRoomMsg, receiver=msg.roomid)
+        # except Exception as e:
+        #     pass
 
     def HappyFunction(self, msg):
         """
@@ -157,57 +160,63 @@ class RoomMsgHandle:
         :param msg:
         :return:
         """
-        atUserLists, noAtMsg = getAtData(self.wcf, msg)
-        senderPoint = self.Dms.searchPoint(sender, roomId)
-        lock = 0
-        pointLock = 0
-        # 埃文IPV4地址查询
-        if judgeSplitAllEqualWord(content, self.aiWenKeyWords):
-            pointLock = 1
-            if judgePointFunction(senderPoint, self.aiWenPoint):
-                self.Dms.reducePoint(sender, roomId, self.aiWenPoint)
-                lock = 1
-        # 微步IPV4查询
-        elif judgeSplitAllEqualWord(content, self.threatBookWords):
-            pointLock = 1
-            if judgePointFunction(senderPoint, self.threatBookPoint):
-                self.Dms.reducePoint(sender, roomId, self.threatBookPoint)
-                lock = 1
-        # CMD5查询
-        elif judgeSplitAllEqualWord(content, self.md5KeyWords):
-            pointLock = 1
-            if judgePointFunction(senderPoint, self.md5Point):
-                self.Dms.reducePoint(sender, roomId, self.md5Point)
-                lock = 1
+        # atUserLists, noAtMsg = getAtData(self.wcf, msg)
+        # senderPoint = self.Dms.searchPoint(sender, roomId)
+        # lock = 0
+        # pointLock = 0
+        Thread(target=self.Pf.mainHandle, args=(msg,)).start()
         # Ai对话
-        elif judgeAtMe(self.wcf.self_wxid, content, atUserLists) and not judgeOneEqualListWord(noAtMsg,
-                                                                                               self.aiPicKeyWords):
-            pointLock = 1
-            if judgePointFunction(senderPoint, self.aiMsgPoint):
-                self.Dms.reducePoint(sender, roomId, self.aiMsgPoint)
-                lock = 1
-        # Ai画图
-        elif judgeAtMe(self.wcf.self_wxid, content, atUserLists) and judgeOneEqualListWord(noAtMsg, self.aiPicKeyWords):
-            pointLock = 1
-            if judgePointFunction(senderPoint, self.aiPicPoint):
-                self.Dms.reducePoint(sender, roomId, self.aiPicPoint)
-                lock = 1
-        # 签到
-        elif judgeEqualWord(content, self.signKeyWord):
-            pointLock = 1
-            lock = 1
-        # 签到口令提示
-        elif judgeEqualWord(content, '签到'):
-            pointLock = 1
-            lock = 1
+        # if judgeAtMe(self.wcf.self_wxid, content, atUserLists) and not judgeOneEqualListWord(noAtMsg,
+        #                                                                                        self.aiPicKeyWords):
+        #     pointLock = 1
+        #     if judgePointFunction(senderPoint, self.aiMsgPoint):
+        #         self.Dms.reducePoint(sender, roomId, self.aiMsgPoint)
+        #         lock = 1
+        # # Ai画图
+        # elif judgeAtMe(self.wcf.self_wxid, content, atUserLists) and judgeOneEqualListWord(noAtMsg,
+        #                                                                                    self.aiPicKeyWords):
+        #     pointLock = 1
+        #     if judgePointFunction(senderPoint, self.aiPicPoint):
+        #         self.Dms.reducePoint(sender, roomId, self.aiPicPoint)
+        #         lock = 1
+        # 埃文IPV4地址查询
+        # if judgeSplitAllEqualWord(content, self.aiWenKeyWords):
+        #     pointLock = 1
+        #     if judgePointFunction(senderPoint, self.aiWenPoint):
+        #         self.Dms.reducePoint(sender, roomId, self.aiWenPoint)
+        #         lock = 1
+        # # 微步IPV4查询
+        # elif judgeSplitAllEqualWord(content, self.threatBookWords):
+        #     pointLock = 1
+        #     if judgePointFunction(senderPoint, self.threatBookPoint):
+        #         self.Dms.reducePoint(sender, roomId, self.threatBookPoint)
+        #         lock = 1
+        # # CMD5查询
+        # elif judgeSplitAllEqualWord(content, self.md5KeyWords):
+        #     pointLock = 1
+        #     if judgePointFunction(senderPoint, self.md5Point):
+        #         self.Dms.reducePoint(sender, roomId, self.md5Point)
+        #         lock = 1
+
+        # # 签到
+        # elif judgeEqualWord(content, self.signKeyWord):
+        #     pointLock = 1
+        #     lock = 1
+        # # 签到口令提示
+        # elif judgeEqualWord(content, '签到'):
+        #     pointLock = 1
+        #     lock = 1
         # 查询积分
-        elif judgeEqualListWord(content, self.searchPointKeyWord):
-            pointLock = 1
-            lock = 1
-        if lock:
-            Thread(target=self.Pf.mainHandle, args=(msg,)).start()
-        else:
-            if pointLock:
-                self.wcf.send_text(
-                    f'@{self.wcf.get_alias_in_chatroom(sender, roomId)} 积分不足, 请签到或祈求管理员施舍 ~~~',
-                    receiver=roomId, aters=sender)
+        # elif judgeEqualListWord(content, self.searchPointKeyWord):
+        #     pointLock = 1
+        #     lock = 1
+        # if lock:
+        #     Thread(target=self.Pf.mainHandle, args=(msg,)).start()
+        # else:
+        #     if pointLock:
+        #         self.wcf.send_text(
+        #             f'@{self.wcf.get_alias_in_chatroom(sender, roomId)} 积分不足, 请签到或祈求管理员施舍 ~~~',
+        #             receiver=roomId, aters=sender)
+
+        # 保存二维码
+

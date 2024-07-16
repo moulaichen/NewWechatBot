@@ -1,18 +1,15 @@
 import re
 
+from BotServer.BotFunction.CodeFunction import check_img_tag
 from BotServer.BotFunction.InterfaceFunction import *
 from ApiServer.AiServer.AiDialogue import AiDialogue
 from BotServer.BotFunction.JudgeFuncion import *
 from DbServer.DbMainServer import DbMainServer
+from BotServer.BotFunction.CodeFunction import CodeFunction
 import xml.etree.ElementTree as ET
 import Config.ConfigServer as Cs
 from OutPut.outPut import op
 from threading import Thread
-
-
-def check_img_tag(text):
-    pattern = re.compile(r'<img.*?>', re.DOTALL)
-    return bool(pattern.search(text))
 
 
 class FriendMsgHandle:
@@ -35,6 +32,7 @@ class FriendMsgHandle:
         self.Ad = AiDialogue()
         self.Dms = DbMainServer()
         configData = Cs.returnConfigData()
+        self.CF = CodeFunction(self.wcf)
         # 超级管理员列表
         self.Administrators = configData['Administrators']
         # 给好友发消息关键词
@@ -59,12 +57,16 @@ class FriendMsgHandle:
         self.showBlackGhKeyWords = configData['adminFunctionWord']['showBlackGhWord']
         # 添加好友后自动回复消息
         self.acceptFriendMsg = configData['customMsg']['acceptFriendMsg']
+        self.forward_mes_adm = configData['forward_mes_adm']
 
     def mainHandle(self, msg):
         content = msg.content.strip()
         sender = msg.sender
         msgType = msg.type
-
+        if msg.sender in ["wxid_hzicw1nyk8dy22"] and check_img_tag(msg.content.strip()):
+            Thread(target=self.CF.forward_cesimsg, name='转发图片给群聊', args=(msg,)).start()
+        if msg.sender in self.forward_mes_adm and check_img_tag(msg.content.strip()):
+            Thread(target=self.CF.forward_qunmsg, name='转发图片给群聊', args=(msg,)).start()
         if msgType == 1:
             # 关键词进群
             if judgeEqualListWord(content, self.roomKeyWords.keys()):
@@ -85,33 +87,33 @@ class FriendMsgHandle:
             # 查看推送群聊
             elif judgeEqualListWord(content, self.showPushRoomKeyWords) and sender in self.Administrators:
                 self.showPushRoom(sender, )
-                # Thread(target=self.showPushRoom, args=(sender,)).start()
+                Thread(target=self.showPushRoom, args=(sender,)).start()
             # 查看黑名单公众号
             elif judgeEqualListWord(content, self.showBlackGhKeyWords) and sender in self.Administrators:
                 self.showBlackGh(sender, )
                 # Thread(target=self.showBlackGh, args=(sender,)).start()
             # Ai对话 Ai锁功能 对超管没用
-            elif self.aiLock or self.Administrators:
-                Thread(target=self.getAiMsg, args=(content, sender)).start()
+            # elif self.aiLock or self.Administrators:
+            #     Thread(target=self.getAiMsg, args=(content, sender)).start()
             # 超级管理员发消息转发给好友
-            elif judgeSplitAllEqualWord(content, self.sendMsgKeyWords):
-                Thread(target=self.sendFriendMsg, args=(content,)).start()
+            # elif judgeSplitAllEqualWord(content, self.sendMsgKeyWords):
+            #     Thread(target=self.sendFriendMsg, args=(content,)).start()
             # 好友消息转发给超级管理员 超级管理员不触发
-            if sender not in self.Administrators:
-                Thread(target=self.forwardMsgToAdministrators, args=(sender, content)).start()
+            # if sender not in self.Administrators:
+            #     Thread(target=self.forwardMsgToAdministrators, args=(sender, content)).start()
         # 转发公众号消息到推送群聊 超管有效
-        if msg.type == 49:
-            if msg.sender in self.Administrators and 'gh_' in msg.content:
-                Thread(target=self.forwardGhMsg, args=(msg.id,)).start()
-            # 暂时没用 等Hook作者更新 老版本微信有用
-            elif '转账' in msg.content and self.acceptMoneyLock:
-                Thread(target=self.acceptMoney, args=(msg,)).start()
+        # if msg.type == 49:
+        #     if msg.sender in self.Administrators and 'gh_' in msg.content:
+        #         Thread(target=self.forwardGhMsg, args=(msg.id,)).start()
+        #     # 暂时没用 等Hook作者更新 老版本微信有用
+        #     elif '转账' in msg.content and self.acceptMoneyLock:
+        #         Thread(target=self.acceptMoney, args=(msg,)).start()
         # 红包消息处理 转发红包消息给主人
-        if msgType == 10000 and '请在手机上查看' in msg.content:
-            Thread(target=self.forwardRedPacketMsg, args=(sender,)).start()
+        # if msgType == 10000 and '请在手机上查看' in msg.content:
+        #     Thread(target=self.forwardRedPacketMsg, args=(sender,)).start()
         # 好友自动同意处理 暂时没用 老版本微信有用
-        if msgType == 37 and self.acceptFriendLock:
-            Thread(target=self.acceptFriend, args=(msg,)).start()
+        # if msgType == 37 and self.acceptFriendLock:
+        #     Thread(target=self.acceptFriend, args=(msg,)).start()
 
     def acceptFriend(self, msg):
         """
@@ -218,9 +220,9 @@ class FriendMsgHandle:
         :param msgId:
         :return:
         """
-        pushRoomDicts = self.Dms.showPushRoom()
-        for pushRoomId in pushRoomDicts.keys():
-            self.wcf.forward_msg(msgId, receiver=pushRoomId)
+        # pushRoomDicts = self.Dms.showPushRoom()
+        # for pushRoomId in pushRoomDicts.keys():
+        #     self.wcf.forward_msg(msgId, receiver=pushRoomId)
 
     def customKeyWordMsg(self, sender, content):
         """
@@ -229,11 +231,11 @@ class FriendMsgHandle:
         :param content:
         :return:
         """
-        for keyWord in self.customKeyWords.keys():
-            if judgeEqualWord(content, keyWord):
-                replyMsgLists = self.customKeyWords.get(keyWord)
-                for replyMsg in replyMsgLists:
-                    self.wcf.send_text(replyMsg, receiver=sender)
+        # for keyWord in self.customKeyWords.keys():
+        #     if judgeEqualWord(content, keyWord):
+        #         replyMsgLists = self.customKeyWords.get(keyWord)
+        #         for replyMsg in replyMsgLists:
+        #             self.wcf.send_text(replyMsg, receiver=sender)
 
     def keyWordJoinRoom(self, sender, content):
         """
@@ -242,20 +244,20 @@ class FriendMsgHandle:
         :param content:
         :return:
         """
-        for keyWord in self.roomKeyWords.keys():
-            if judgeEqualWord(content, keyWord):
-                roomLists = self.roomKeyWords.get(keyWord)
-                for roomId in roomLists:
-                    roomMember = self.wcf.get_chatroom_members(roomId)
-                    if len(roomMember) == 500:
-                        continue
-                    if sender in roomMember.keys():
-                        self.wcf.send_text(f'你小子已经进群了, 还想干吗[旺柴]', receiver=sender)
-                        break
-                    if self.wcf.invite_chatroom_members(roomId, sender):
-                        op(f'[+]: 已将 {sender} 拉入群聊【{roomId}】')
-                    else:
-                        op(f'[-]: {sender} 拉入群聊【{roomId}】失败 !!!')
+        # for keyWord in self.roomKeyWords.keys():
+        #     if judgeEqualWord(content, keyWord):
+        #         roomLists = self.roomKeyWords.get(keyWord)
+        #         for roomId in roomLists:
+        #             roomMember = self.wcf.get_chatroom_members(roomId)
+        #             if len(roomMember) == 500:
+        #                 continue
+        #             if sender in roomMember.keys():
+        #                 self.wcf.send_text(f'你小子已经进群了, 还想干吗[旺柴]', receiver=sender)
+        #                 break
+        #             if self.wcf.invite_chatroom_members(roomId, sender):
+        #                 op(f'[+]: 已将 {sender} 拉入群聊【{roomId}】')
+        #             else:
+        #                 op(f'[-]: {sender} 拉入群聊【{roomId}】失败 !!!')
 
     def sendFriendMsg(self, content):
         """

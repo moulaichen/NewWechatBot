@@ -330,4 +330,7 @@ class DbMainServer:
 if __name__ == '__main__':
     Ds = DbMainServer()
     # print(Ds.clearSign())
-    print(Ds.searchPoint('sender', 'roomid'))
+    # print(Ds.searchPoint('sender', 'roomid'))
+    print(Ds.addPushRoom('sender', 'roomid'))
+    # print(Ds.delPushRoom('sender'))
+    print(Ds.showPushRoom())

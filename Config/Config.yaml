@@ -2,6 +2,16 @@
 Administrators:
   - 'wxid_7bizfilssbwi22'
 
+zhuanfaqun:
+  # 微信id
+  - '43853325508@chatroom'
+
+forward_mes_adm:
+  - 'love623954275'
+
+save_image_qun:
+  - '43853325508@chatroom'
+
 ## 系统配置
 systemConfig:
   # 版权信息
@@ -13,6 +23,8 @@ systemConfig:
   acceptMoneyLock: 1
   # 自动同意好友开关
   acceptFriendLock: 1
+
+
 
 ## 定时发送配置
 pushConfig:
@@ -308,13 +320,13 @@ apiServer:
       # 模型Url
       sparkAiApi: 'wss://spark-api.xf-yun.com/v4.0/chat'
       # 模型Secret
-      sparkAiSecret: ''
+      sparkAiSecret: 'ZGFhOGM3ODA3OWVjNjkwNDJjZjQwNWNl'
       # 模型版本
       sparkDomain: '4.0Ultra'
       # 模型Key
-      sparkAiKey: ''
+      sparkAiKey: '4a4a11d86cfc5b48e8fbf10aa8251578'
       # 模型Appid
-      sparkAiAppid: ''
+      sparkAiAppid: '4e9b35f8'
     # OpenAi 3.5模型
     openAi:
       # Open_Ai接口
