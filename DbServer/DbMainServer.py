@@ -331,6 +331,6 @@ if __name__ == '__main__':
     Ds = DbMainServer()
     # print(Ds.clearSign())
     # print(Ds.searchPoint('sender', 'roomid'))
-    print(Ds.addPushRoom('sender', 'roomid'))
-    # print(Ds.delPushRoom('sender'))
+    # print(Ds.addPushRoom('43853325508@chatroom', '测试'))
+    print(Ds.delPushRoom('47353492569@chatroom'))
     print(Ds.showPushRoom())

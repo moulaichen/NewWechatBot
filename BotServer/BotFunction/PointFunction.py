@@ -33,7 +33,7 @@ class PointFunction:
             # Ai对话
             if judgeAtMe(self.wcf.self_wxid, content, atUserLists) and not judgeOneEqualListWord(noAtMsg,
                                                                                                  self.aiPicKeyWords):
-                op("正在调用ai")
+                op("[*]正在调用ai")
                 aiMsg = self.Ams.getAi(noAtMsg)
                 if aiMsg:
                     self.wcf.send_text(f'@{senderName} {aiMsg}',
