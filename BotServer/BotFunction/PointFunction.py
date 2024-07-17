@@ -35,6 +35,10 @@ class PointFunction:
                                                                                                  self.aiPicKeyWords):
                 op("[*]正在调用ai")
                 aiMsg = self.Ams.getAi(noAtMsg)
+                isAT = len(atUserLists) > 1
+                if isAT:
+                    second_at_index = content.find('@', content.find('@') + 1)
+                    senderName = content[second_at_index + 1:]
                 if aiMsg:
                     self.wcf.send_text(f'@{senderName} {aiMsg}',
                                        receiver=roomId, aters=sender)
@@ -45,7 +49,7 @@ class PointFunction:
             # Ai画图
             elif judgeAtMe(self.wcf.self_wxid, content, atUserLists) and judgeOneEqualListWord(noAtMsg,
                                                                                                self.aiPicKeyWords):
-                op("正在调用ai画图")
+                op("[*]正在调用ai画图")
                 aiPicPath = self.Ams.getAiPic(noAtMsg)
                 if aiPicPath:
                     self.wcf.send_image(path=aiPicPath, receiver=roomId)

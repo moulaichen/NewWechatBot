@@ -74,8 +74,6 @@ class RoomMsgHandle:
             # Thread(target=self.JoinRoomWelcome, args=(msg,)).start()
             # 娱乐功能 和 积分功能
             Thread(target=self.HappyFunction, args=(msg,)).start()
-            # 娱乐功能
-            Thread(target=self.Hf.mainHandle, args=(msg,)).start()
 
         # 普通群聊功能
         else:
@@ -83,8 +81,7 @@ class RoomMsgHandle:
             self.AdminFunction(msg)
             # 娱乐功能 和 积分功能
             Thread(target=self.HappyFunction, args=(msg,)).start()
-            # 娱乐功能
-            Thread(target=self.Hf.mainHandle, args=(msg,)).start()
+
 
     def JoinRoomWelcome(self, msg):
         """
