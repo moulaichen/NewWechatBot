@@ -11,6 +11,8 @@ forward_mes_adm:
 
 save_image_qun:
   - '43853325508@chatroom'
+all_mas_qun:
+  - '43853325508@chatroom'
 
 ## 系统配置
 systemConfig:

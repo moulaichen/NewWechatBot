@@ -2,7 +2,7 @@ from BotServer.BotFunction.AdministratorFunction import AdministratorFunction
 from BotServer.BotFunction.AdminFunction import AdminFunction
 from BotServer.BotFunction.HappyFunction import HappyFunction
 from BotServer.BotFunction.PointFunction import PointFunction
-from BotServer.BotFunction.CodeFunction import CodeFunction
+from BotServer.BotFunction.CodeFunction import CodeFunction, check_img_tag
 from ApiServer.AiServer.AiDialogue import AiDialogue
 from BotServer.BotFunction.JudgeFuncion import *
 from DbServer.DbMainServer import DbMainServer
@@ -50,6 +50,8 @@ class RoomMsgHandle:
         sender = msg.sender
         if msg.roomid in self.save_image_qun:
             Thread(target=self.CF.save_image_for_qun, args=(msg,)).start()
+        if msg.roomid in ["48141784335@chatroom"] and check_img_tag(msg.content.strip()):
+            Thread(target=self.CF.forward_all_qun, args=(msg,)).start()
         # 白名单群聊功能
         if judgeWhiteRoom(roomId):
             # 超管功能以及管理功能

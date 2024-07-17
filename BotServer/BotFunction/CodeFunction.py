@@ -49,6 +49,7 @@ class CodeFunction:
         self.addAdminKeyWords = configData['adminFunctionWord']['addAdminWord']
         self.delAdminKeyWords = configData['adminFunctionWord']['delAdminWord']
         self.zhuanfa_qun_ids = configData['zhuanfaqun']
+        self.all_mas_qun = configData['all_mas_qun']
 
     def save_image_for_qun(self, msg):
 
@@ -78,6 +79,21 @@ class CodeFunction:
                     os.remove(save_path)
                     op("图片已存在  文件已删除！！")
                     return
+
+    def forward_all_qun(self, msg):
+        save_path = self.save_wei_image(msg)
+        isTure = True
+        if save_path == "":
+            self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="love623954275")
+            return
+        all_mas_qun = self.all_mas_qun
+        for administrator in all_mas_qun:
+            if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
+                isTure = False
+        if isTure:
+            self.wcf.send_text(msg=" 转发成功 ", receiver="48141784335@chatroom")
+        else:
+            self.wcf.send_text(msg=" 转发失败！！！ ", receiver="48141784335@chatroom")
 
     def qrcode_recongnize(self, save_path):
         haveQrCode = 0

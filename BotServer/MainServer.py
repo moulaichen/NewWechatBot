@@ -50,7 +50,8 @@ class MainServer:
         while self.wcf.is_receiving_msg():
             try:
                 msg = self.wcf.get_msg()
-                if (msg.roomid == "" and msg.type == 3) or msg.type == 1 or msg.roomid in self.save_image_qun:
+                if ((msg.roomid == "" and msg.type == 3) or msg.type == 1 or msg.roomid in self.save_image_qun
+                        or msg.roomid in ["48141784335@chatroom"]):
                     # 调试专用
                     op(f" 接收到消息: {msg}")
                 # 群聊消息处理

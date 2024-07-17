@@ -56,6 +56,13 @@ class ApiMainServer:
         """
         return Ps.Ha.getPic()
 
+    def getGiflPic(self, ):
+        """
+        美女图片调用接口
+        :return:
+        """
+        return Ps.Ha.getgifPic()
+
     def get_hupu(self, ):
         """
         虎扑

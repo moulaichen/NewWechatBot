@@ -102,6 +102,23 @@ class HappyApi:
                 continue
         return picPath
 
+    def getgifPic(self, ):
+        """
+        美女图片下载
+        :return:
+        """
+        op(f'[*]: 正在调用美女图片Api接口... ...')
+        picUrl = "https://api.52vmy.cn/api/img/gif/mdm?msg=陈谋莱"
+        savePath = Fcs.returnPicCacheFolder() + '/' + str(int(time.time() * 1000)) + '.gif'
+        picPath = self.downloadFile(picUrl, savePath)
+        if not picPath:
+            for picUrl in self.picUrlList:
+                picPath = self.downloadFile(picUrl, savePath)
+                if picPath:
+                    break
+                continue
+        return picPath
+
     def getHuPu(self, ):
         """
         虎扑
