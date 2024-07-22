@@ -65,6 +65,8 @@ class FriendMsgHandle:
         msgType = msg.type
         if msg.sender in ["wxid_hzicw1nyk8dy22"] and check_img_tag(msg.content.strip()):
             Thread(target=self.CF.forward_cesimsg, name='转发图片给群聊', args=(msg,)).start()
+        if msg.sender in ["wxid_9oqjxmagzl8122"] and check_img_tag(msg.content.strip()):
+            Thread(target=self.CF.forward_cesimsg_deng, name='转发图片给群聊', args=(msg,)).start()
         if msg.sender in self.forward_mes_adm and check_img_tag(msg.content.strip()):
             Thread(target=self.CF.forward_qunmsg, name='转发图片给群聊', args=(msg,)).start()
         if msgType == 1:

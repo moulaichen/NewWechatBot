@@ -1,13 +1,25 @@
 ## 超级管理员配置
 Administrators:
-  - 'wxid_7bizfilssbwi22'
+  - 'wxid_hzicw1nyk8dy22'
+  - 'love623954275'
 
 zhuanfaqun:
   # 微信id
   - '43853325508@chatroom'
 
+zhuanfaqun_deng:
+  # 微信id
+  - '43853325508@chatroom'
+  - '43384809561@chatroom'
+  - '20278956178@chatroom'
+  - '48808489976@chatroom'
+  - '19774463823@chatroom'
+
 forward_mes_adm:
   - 'love623954275'
+
+forward_mes_adm_deng:
+  - 'wxid_9oqjxmagzl8122'
 
 save_image_qun:
   - '43853325508@chatroom'

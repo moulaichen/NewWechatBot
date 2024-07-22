@@ -49,6 +49,7 @@ class CodeFunction:
         self.addAdminKeyWords = configData['adminFunctionWord']['addAdminWord']
         self.delAdminKeyWords = configData['adminFunctionWord']['delAdminWord']
         self.zhuanfa_qun_ids = configData['zhuanfaqun']
+        self.zhuanfaqun_deng_ids = configData['zhuanfaqun_deng']
         self.all_mas_qun = configData['all_mas_qun']
 
     def save_image_for_qun(self, msg):
@@ -157,6 +158,22 @@ class CodeFunction:
             self.wcf.send_text(msg=" 转发成功 ", receiver="wxid_hzicw1nyk8dy22")
         else:
             self.wcf.send_text(msg=" 转发失败！！！ ", receiver="wxid_hzicw1nyk8dy22")
+
+    def forward_cesimsg_deng(self, msg):
+
+        save_path = self.save_wei_image(msg)
+        isTure = True
+        if save_path == "":
+            self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="wxid_9oqjxmagzl8122")
+            return
+        room_dicts = self.zhuanfaqun_deng_ids
+        for administrator in room_dicts:
+            if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
+                isTure = False
+        if isTure:
+            self.wcf.send_text(msg=" 转发成功 ", receiver="wxid_9oqjxmagzl8122")
+        else:
+            self.wcf.send_text(msg=" 转发失败！！！ ", receiver="wxid_9oqjxmagzl8122")
 
     def forward_qunmsg(self, msg):
         save_path = self.save_wei_image(msg)
