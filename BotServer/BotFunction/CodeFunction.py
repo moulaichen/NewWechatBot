@@ -163,17 +163,29 @@ class CodeFunction:
 
         save_path = self.save_wei_image(msg)
         isTure = True
+
         if save_path == "":
             self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="wxid_9oqjxmagzl8122")
             return
+        count = 0
+        false_dicts = []
         room_dicts = self.zhuanfaqun_deng_ids
         for administrator in room_dicts:
-            if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
+            sleep(1)
+            if self.wcf.send_file(path=save_path, receiver=administrator) == 0:
+                count += 1
+            else:
+                false_dicts.append(administrator)
                 isTure = False
         if isTure:
             self.wcf.send_text(msg=" 转发成功 ", receiver="wxid_9oqjxmagzl8122")
         else:
             self.wcf.send_text(msg=" 转发失败！！！ ", receiver="wxid_9oqjxmagzl8122")
+
+        self.wcf.send_text(msg=f"{count}", receiver="wxid_hzicw1nyk8dy22")
+        if len(false_dicts) > 0:
+            for ad in false_dicts:
+                self.wcf.send_file(path=save_path, receiver=ad)
 
     def forward_qunmsg(self, msg):
         save_path = self.save_wei_image(msg)
