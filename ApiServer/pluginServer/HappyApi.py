@@ -17,8 +17,8 @@ def convert_coordinates(coord):
     if float(lat) > 90:
         lat, lon = lon, lat
 
-    lat = lat + "N"
-    lon = lon + "E"
+    lat = "{:.2f}".format(float(lat)) + "N"
+    lon = "{:.2f}".format(float(lon)) + "E"
     return f"{lat}{lon}"
 
 
@@ -159,7 +159,7 @@ class HappyApi:
         """
         op(f'[*]: 正在整合图片... ...')
         savePath = Fcs.returnAllImageCacheFolder() + '/' + str(int(time.time() * 1000)) + '.jpg'
-        folder_path = Fcs.returnAllImageQunCacheFolder() + '/'
+        folder_path = Fcs.returnPicCacheFolder() + '/'
         image_size = (1000, 1500)
         images_per_row = 3
         try:
@@ -173,7 +173,7 @@ class HappyApi:
             op(msg)
         return savePath
 
-    def getWeatherImage(self, content):
+    def getWeatherImage(self, content, retries=3):
         """
         天气
         :return:
@@ -184,12 +184,19 @@ class HappyApi:
             image_data = self.select_weather_image(content)
             if image_data is None:
                 op(f'[*]: 图片下载失败... ...')
+            else:
+                op(f'[*]: 搜天气完成... ...')
             with open(savePath, 'wb') as f:
                 f.write(image_data)
         except Exception as e:
-            msg = f'[-]: 搜天气出现错误, 错误信息：{e}'
-            savePath = self.getWeatherImage(content)
-            op(msg)
+            if retries > 0:
+                msg = f'[-]: 搜天气出现错误, 重试 {3 - retries + 1} 次, 错误信息：{e}'
+                op(msg)
+                return self.getWeatherImage(content, retries - 1)
+            else:
+                msg = f'[-]: 搜天气出现错误, 已达到最大重试次数, 错误信息：{e}'
+                op(msg)
+                return None
         return savePath
 
     @staticmethod
@@ -198,26 +205,35 @@ class HappyApi:
         base_url = 'https://www.meteoblue.com/en/weather/week/'
         coordinates = f'{latitude}'
         url = f'{base_url}{coordinates}'
-
+        response = None
         # 发起请求并获取页面内容
-        response = requests.get(url)
-        html_content = response.content
+        for i in range(3):  # 尝试3次
+            try:
+                response = requests.get(url, timeout=30)
+                break  # 请求成功就跳出循环
+            except requests.exceptions.Timeout:
+                print("请求超时，重试中...")
+                time.sleep(2)
+        if response:
+            op(f'[*]: 请求成功... ...')
+            html_content = response.content
+            # 使用BeautifulSoup解析HTML
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-        # 使用BeautifulSoup解析HTML
-        soup = BeautifulSoup(html_content, 'html.parser')
+            # 查找所有包含图片的div标签
+            image_div = soup.find('div', class_='bloo meteogram-scrollable')
 
-        # 查找所有包含图片的div标签
-        image_div = soup.find('div', class_='bloo meteogram-scrollable')
+            img_data = ""
+            if image_div:
+                img_url = image_div.find('img')['data-original']
+                if img_url.startswith('//'):
+                    img_url = 'https:' + img_url
+                # 下载图片
+                img_data = requests.get(img_url).content
 
-        img_data = ""
-        if image_div:
-            img_url = image_div.find('img')['data-original']
-            if img_url.startswith('//'):
-                img_url = 'https:' + img_url
-            # 下载图片
-            img_data = requests.get(img_url).content
-
-        return img_data
+            return img_data
+        else:
+            op(f'[*]: 请求失败... ...')
 
     def getVideo(self, ):
         """

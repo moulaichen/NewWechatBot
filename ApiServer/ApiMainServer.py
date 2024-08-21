@@ -112,13 +112,24 @@ class ApiMainServer:
         """
         return Ps.Ha.getDog()
 
-    def getAi(self, content):
+    def getAi(self, content, roomId, senderName):
         """
         Ai对话调用接口
+        :param senderName:
+        :param roomId:
         :param content:
         :return:
         """
-        return self.Ad.getNewAi(content)
+        return self.Ad.getNewAi(content, roomId, senderName)
+
+    def setAi(self, roomId):
+        """
+        Ai对话调用接口
+        :param roomId:
+        :param content:
+        :return:
+        """
+        return self.Ad.setNewAi(roomId)
 
     def getAiPic(self, content):
         """

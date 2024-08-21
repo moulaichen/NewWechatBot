@@ -85,12 +85,20 @@ class CodeFunction:
         save_path = self.save_wei_image(msg)
         isTure = True
         if save_path == "":
-            self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="love623954275")
+            self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="48141784335@chatroom")
             return
-        all_mas_qun = self.all_mas_qun
-        for administrator in all_mas_qun:
-            if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
-                isTure = False
+        contacts = self.wcf.get_contacts()
+        # contacts_dict = {contact['wxid']: contact['name'] for contact in contacts}
+        #
+        # # 提取所有wxid中包含@chatroom的wxid和name
+        # chatroom_contacts_dict = {wxid: name for wxid, name in contacts_dict.items() if '@chatroom' in wxid}
+
+        chatroom_wxids = [contact['wxid'] for contact in contacts if '@chatroom' in contact['wxid']]
+        # all_mas_qun = self.all_mas_qun
+        for administrator in chatroom_wxids:
+            if administrator != "48141784335@chatroom":
+                if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
+                    isTure = False
         if isTure:
             self.wcf.send_text(msg=" 转发成功 ", receiver="48141784335@chatroom")
         else:
@@ -167,22 +175,16 @@ class CodeFunction:
         if save_path == "":
             self.wcf.send_text(msg=" 下载图片失败！！！！", receiver="wxid_9oqjxmagzl8122")
             return
-        count = 0
         false_dicts = []
         room_dicts = self.zhuanfaqun_deng_ids
         for administrator in room_dicts:
-            sleep(1)
-            if self.wcf.send_file(path=save_path, receiver=administrator) == 0:
-                count += 1
-            else:
+            if self.wcf.send_file(path=save_path, receiver=administrator) != 0:
                 false_dicts.append(administrator)
                 isTure = False
         if isTure:
             self.wcf.send_text(msg=" 转发成功 ", receiver="wxid_9oqjxmagzl8122")
         else:
             self.wcf.send_text(msg=" 转发失败！！！ ", receiver="wxid_9oqjxmagzl8122")
-
-        self.wcf.send_text(msg=f"{count}", receiver="wxid_hzicw1nyk8dy22")
         if len(false_dicts) > 0:
             for ad in false_dicts:
                 self.wcf.send_file(path=save_path, receiver=ad)

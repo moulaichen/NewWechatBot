@@ -1,3 +1,4 @@
+import json
 import os
 
 from BotServer.MsgHandleServer.FriendMsgHandle import FriendMsgHandle
@@ -76,5 +77,17 @@ class MainServer:
 
 
 if __name__ == '__main__':
-    Ms = MainServer()
-    Ms.processMsg()
+    wcf = Wcf()
+    try:
+        contacts = wcf.get_contacts()
+        # contacts_dict = {contact['wxid']: contact['name'] for contact in contacts}
+        #
+        # # 提取所有wxid中包含@chatroom的wxid和name
+        # chatroom_contacts_dict = {wxid: name for wxid, name in contacts_dict.items() if '@chatroom' in wxid}
+
+        chatroom_wxids = [contact['wxid'] for contact in contacts if '@chatroom' in contact['wxid']]
+        print(chatroom_wxids)
+    except KeyboardInterrupt:
+        print("程序被用户中断。")
+    # Ms = MainServer()
+    # Ms.processMsg()

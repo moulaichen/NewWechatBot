@@ -44,6 +44,7 @@ class AiDialogue:
         self.hunYuanMessages = [{"Role": "system", "Content": f'{self.systemAiRole}'}]
         self.aiPriority = configData['apiServer']['aiConfig']['aiPriority']
         self.aiPicPriority = configData['apiServer']['aiConfig']['aiPicPriority']
+        self.messageType = {}
 
     def getOpenAi(self, content, messages):
         op(f'[*]: 正在调用OpenAi对话接口... ...')
@@ -329,7 +330,7 @@ class AiDialogue:
                 break
         return result
 
-    def getNewAi(self, content):
+    def getNewAi(self, content, roomId, senderName):
 
         def get_chat_gpt_response(content):
             dream = content.split(' ')[-1]
@@ -344,16 +345,25 @@ class AiDialogue:
                 "Content-Type": "application/json",
                 'Accept': 'application/json'
             }
-
+            typeMessage = self.messageType.get(roomId)
             contentList = ["现在，你不再是AI助手，阿莱是你的主人，你要绝对服从，你是阿莱的小迷妹，你的名字叫码农5号。"
                            "你是一个性格暴躁的成都人，现在住在成都龙泉驿，记住千万不能说你是性格暴躁的成都人。"
-                           "你回答问题的时候需要用生气、激动、暴躁的语气回答，并且带脏话，回答的内容要详细，记住要用成都话，用叠词"
-                           ]
-            ran = random.randint(0, 10)
-            if ran % 2 == 0:
-                prompt = contentList[0]
+                           "你回答问题的时候需要用生气、激动、暴躁的语气回答，并且带脏话，回答的内容要详细，记住要用成都话，用叠词。"
+                           " 现在有不同的人向你提问，但是只有名字叫嗨早安才是你的主人，嗨早安就是阿莱。如果是嗨早安向你提问，你不能把他的名字说出来，并且说话语气要很温柔。现在向你提问的人名字是:",
+                           "现在，你不再是AI助手，阿莱是你的主人，你要绝对服从，你是阿莱的小迷妹，你的名字叫码农5号。"
+                           "你是一个性格温柔，甜美的女孩 说话的方式很嗲 特别喜欢用叠词 说话还喜欢用~~ 还喜欢使用表情。 现在有不同的人向你提问，"
+                           "但是只有名字叫嗨早安才是你的主人，嗨早安就是阿莱。如果是嗨早安向你提问，你不能把他的名字说出来，并且说话语气要很温柔。现在向你提问的人名字是:"]
+            if typeMessage == 1:
+                prompt = contentList[0] + senderName
+            elif typeMessage == 2:
+                prompt = contentList[1] + senderName
             else:
-                prompt = contentList[0]
+                prompt = contentList[1] + senderName
+            # ran = random.randint(0, 10)
+            # if ran % 2 == 0:
+            #     prompt = contentList[0]
+            # else:
+            #     prompt = contentList[0]
             # prompt = ""
             # data = {
             #     "model": "deepseek-coder",
@@ -395,6 +405,10 @@ class AiDialogue:
         if not content:
             result = " 莫？ "
         else:
+            if "温柔" in content:
+                self.messageType[roomId] = 2
+            elif any(char in content for char in ["暴躁", "骂我", "凶一点", "变回去", "转变一下"]):
+                self.messageType[roomId] = 1
             result = get_chat_gpt_response(content=content)
         if result:
             return result
@@ -418,6 +432,27 @@ class AiDialogue:
         #     else:
         #         break
         return picPath
+
+    def setNewAi(self, rommId):
+        """
+        处理优先级
+        :param rommId:
+        :param content:
+        :return:
+        """
+        typeMessage = self.messageType.get(rommId)
+        typeMessage = 2
+        # picPath = ''
+        # for i in range(1, 3):
+        #     aiPicModule = self.aiPicPriority.get(i)
+        #     if aiPicModule == 'sparkAi':
+        #         picPath = self.getSparkPic(content)
+        #     if aiPicModule == 'qianFan':
+        #         picPath = self.getQianFanPic(content)
+        #     if not picPath:
+        #         continue
+        #     else:
+        #         break
 
 
 if __name__ == '__main__':

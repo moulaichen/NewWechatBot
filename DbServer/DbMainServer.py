@@ -332,5 +332,5 @@ if __name__ == '__main__':
     # print(Ds.clearSign())
     # print(Ds.searchPoint('sender', 'roomid'))
     # print(Ds.addPushRoom('43853325508@chatroom', '测试'))
-    print(Ds.delPushRoom('47353492569@chatroom'))
+    # print(Ds.delPushRoom('47353492569@chatroom'))
     print(Ds.showPushRoom())

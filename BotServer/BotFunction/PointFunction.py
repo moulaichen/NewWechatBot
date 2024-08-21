@@ -34,7 +34,7 @@ class PointFunction:
             if judgeAtMe(self.wcf.self_wxid, content, atUserLists) and not judgeOneEqualListWord(noAtMsg,
                                                                                                  self.aiPicKeyWords):
                 op("[*]正在调用ai")
-                aiMsg = self.Ams.getAi(noAtMsg)
+                aiMsg = self.Ams.getAi(noAtMsg, roomId, senderName)
                 isAT = len(atUserLists) > 1
                 if isAT:
                     second_at_index = content.find('@', content.find('@') + 1)
